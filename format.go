@@ -13,10 +13,16 @@ import (
 
 const (
 	timeFormat     = "2006-01-02T15:04:05-0700"
-	termTimeFormat = "01-02|15:04:05"
 	floatFormat    = 'f'
-	termMsgJust    = 40
+	termMsgJust    = 10
 )
+
+// 2022/5/31 14:45:34
+func termTimeFormat(t time.Time) string {
+	year, month, day := t.Date()
+	hour, min, sec := t.Clock()
+	return fmt.Sprintf("%d/%d/%d %d:%d:%d", year, month, day, hour, min, sec)
+}
 
 // Format  is the interface implemented by StreamHandler formatters.
 type Format interface {
@@ -64,9 +70,9 @@ func TerminalFormat() Format {
 		b := &bytes.Buffer{}
 		lvl := strings.ToUpper(r.Lvl.String())
 		if color > 0 {
-			fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%s] %s ", color, lvl, r.Time.Format(termTimeFormat), r.Msg)
+			fmt.Fprintf(b, "%s \x1b[%dm[%s]\x1b[0m %s ",  termTimeFormat(r.Time), color, lvl, r.Msg)
 		} else {
-			fmt.Fprintf(b, "[%s] [%s] %s ", lvl, r.Time.Format(termTimeFormat), r.Msg)
+			fmt.Fprintf(b, "[%s] [%s] %s ", termTimeFormat(r.Time), lvl, r.Msg)
 		}
 
 		// try to justify the log output for short messages

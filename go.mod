@@ -6,5 +6,6 @@ require (
 	github.com/go-stack/stack v1.8.1
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mattn/go-isatty v0.0.14
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
 )
+
+require golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
