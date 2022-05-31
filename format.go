@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -21,7 +22,7 @@ const (
 func termTimeFormat(t time.Time) string {
 	year, month, day := t.Date()
 	hour, min, sec := t.Clock()
-	return fmt.Sprintf("%d/%d/%d %d:%d:%d", year, month, day, hour, min, sec)
+	return fmt.Sprintf("%d/%02d/%02d %02d:%02d:%02d", year, month, day, hour, min, sec)
 }
 
 // Format  is the interface implemented by StreamHandler formatters.
@@ -69,10 +70,11 @@ func TerminalFormat() Format {
 
 		b := &bytes.Buffer{}
 		lvl := strings.ToUpper(r.Lvl.String())
+		gid := getGID()
 		if color > 0 {
-			fmt.Fprintf(b, "%s \x1b[%dm[%s]\x1b[0m %s ",  termTimeFormat(r.Time), color, lvl, r.Msg)
+			fmt.Fprintf(b, "%s \x1b[%dm[%s]\x1b[0m GID=%d %s ",  termTimeFormat(r.Time), color, lvl, gid, r.Msg)
 		} else {
-			fmt.Fprintf(b, "[%s] [%s] %s ", termTimeFormat(r.Time), lvl, r.Msg)
+			fmt.Fprintf(b, "[%s] [%s] GID=%d %s ", termTimeFormat(r.Time), lvl, gid, r.Msg)
 		}
 
 		// try to justify the log output for short messages
@@ -94,6 +96,24 @@ func TerminalFormat() Format {
 func LogfmtFormat() Format {
 	return FormatFunc(func(r *Record) []byte {
 		common := []interface{}{r.KeyNames.Time, r.Time, r.KeyNames.Lvl, r.Lvl, r.KeyNames.Msg, r.Msg}
+		buf := &bytes.Buffer{}
+		logfmt(buf, append(common, r.Ctx...), 0)
+		return buf.Bytes()
+	})
+}
+
+func getGID() uint64 {
+	var buf [64]byte
+	b := buf[:runtime.Stack(buf[:], false)]
+	b = bytes.TrimPrefix(b, []byte("goroutine "))
+	b = b[:bytes.IndexByte(b, ' ')]
+	n, _ := strconv.ParseUint(string(b), 10, 64)
+	return n
+}
+
+func LogfmtWithGIDFormat() Format {
+	return FormatFunc(func(r *Record) []byte {
+		common := []interface{}{r.KeyNames.Time, r.Time, r.KeyNames.Lvl, r.Lvl, "GID", getGID(), r.KeyNames.Msg, r.Msg}
 		buf := &bytes.Buffer{}
 		logfmt(buf, append(common, r.Ctx...), 0)
 		return buf.Bytes()

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/mattn/go-colorable"
@@ -10,8 +11,8 @@ import (
 // Predefined handlers
 var (
 	root          *logger
-	StdoutHandler = StreamHandler(os.Stdout, LogfmtFormat())
-	StderrHandler = StreamHandler(os.Stderr, LogfmtFormat())
+	StdoutHandler = StreamHandler(os.Stdout, LogfmtWithGIDFormat())
+	StderrHandler = StreamHandler(os.Stderr, LogfmtWithGIDFormat())
 )
 
 func init() {
@@ -65,4 +66,37 @@ func Error(msg string, ctx ...interface{}) {
 // Crit is a convenient alias for Root().Crit
 func Crit(msg string, ctx ...interface{}) {
 	root.write(msg, LvlCrit, ctx)
+}
+
+// Fatal is a convenient alias for Root().Crit
+var Fatal = Crit
+
+func Debugf(format string, a ...interface{}) {
+	msg :=  fmt.Sprintf(format, a...)
+	Debug(msg)
+}
+
+func Infof(format string, a ...interface{}) {
+	msg :=  fmt.Sprintf(format, a...)
+	Info(msg)
+}
+
+func Warnf(format string, a ...interface{}) {
+	msg :=  fmt.Sprintf(format, a...)
+	Warn(msg)
+}
+
+func Errorf(format string, a ...interface{}) {
+	msg :=  fmt.Sprintf(format, a...)
+	Error(msg)
+}
+
+func Fatalf(format string, a ...interface{}) {
+	msg :=  fmt.Sprintf(format, a...)
+	Fatal(msg)
+}
+
+func Critf(format string, a ...interface{}) {
+	msg :=  fmt.Sprintf(format, a...)
+	Crit(msg)
 }

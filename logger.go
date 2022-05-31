@@ -29,15 +29,15 @@ const (
 func (l Lvl) String() string {
 	switch l {
 	case LvlDebug:
-		return "debug"
+		return "dbug"
 	case LvlInfo:
-		return "info "
+		return "info"
 	case LvlWarn:
-		return "warn "
+		return "warn"
 	case LvlError:
-		return "error"
+		return "eror"
 	case LvlCrit:
-		return "crit "
+		return "crit"
 	default:
 		panic("bad level")
 	}
